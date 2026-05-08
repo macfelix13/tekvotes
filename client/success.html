@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Status — TekVotes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .success-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 1.5rem 3rem;
+        }
+        .success-card {
+            max-width: 550px;
+            width: 100%;
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            text-align: center;
+            animation: fadeInUp 0.6s ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #10b981, #34d399);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            animation: scaleIn 0.5s ease;
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .success-icon i { font-size: 3rem; color: white; }
+        .error-icon {
+            background: linear-gradient(135deg, #ef4444, #f87171);
+        }
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #e5e7eb;
+            border-top-color: #D4AF37;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 1.5rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        h1 { font-size: 1.75rem; margin-bottom: 0.5rem; }
+        .subtitle { color: #6b7280; margin-bottom: 2rem; }
+        
+        /* Receipt */
+        .receipt {
+            background: #f9fafb;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            text-align: left;
+        }
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .receipt-row:last-child { border-bottom: none; }
+        .receipt-label { color: #6b7280; }
+        .receipt-value { font-weight: 600; color: #111; }
+        .receipt-value.amount { color: #D4AF37; font-size: 1.25rem; }
+        
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            border-radius: 0.75rem;
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #D4AF37, #E8C860);
+            color: #111;
+        }
+        .btn-primary:hover { transform: translateY(-2px); }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #e5e7eb;
+            color: #374151;
+        }
+        .btn-outline:hover { border-color: #D4AF37; color: #D4AF37; }
+        
+        .back-home {
+            display: inline-block;
+            margin-top: 1.5rem;
+            color: #6b7280;
+            text-decoration: none;
+        }
+        .back-home:hover { color: #D4AF37; }
+        
+        .hidden { display: none !important; }
+        
+        /* Footer */
+        .footer {
+            background: #111;
+            color: #9ca3af;
+            padding: 2rem 0;
+            text-align: center;
+            margin-top: auto;
+        }
+        @media (max-width: 640px) {
+            .success-card { padding: 1.5rem; }
+            .button-group { flex-direction: column; }
+            .btn { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-card">
+            <!-- Loading State -->
+            <div id="loadingState">
+                <div class="loading-spinner"></div>
+                <h1>Verifying Your Payment</h1>
+                <p class="subtitle">Please wait while we confirm your transaction...</p>
+            </div>
+
+            <!-- Success State -->
+            <div id="successState" class="hidden">
+                <div class="success-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h1>Payment Successful! 🎉</h1>
+                <p class="subtitle">Your votes have been counted. Thank you for supporting your contestant!</p>
+                
+                <div class="receipt" id="receipt">
+                    <div class="receipt-row">
+                        <span class="receipt-label">Contestant</span>
+                        <span class="receipt-value" id="receiptContestant">—</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Number of Votes</span>
+                        <span class="receipt-value" id="receiptVotes">—</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Voter Name</span>
+                        <span class="receipt-value" id="receiptVoterName">—</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Email</span>
+                        <span class="receipt-value" id="receiptEmail">—</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Amount Paid</span>
+                        <span class="receipt-value amount" id="receiptAmount">—</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Transaction Reference</span>
+                        <span class="receipt-value" id="receiptRef" style="font-size: 0.7rem;">—</span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Date & Time</span>
+                        <span class="receipt-value" id="receiptDate">—</span>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button onclick="window.print()" class="btn btn-outline">
+                        <i class="fas fa-print"></i> Print Receipt
+                    </button>
+                    <a href="contestants.html" class="btn btn-outline">
+                        <i class="fas fa-users"></i> View Contestants
+                    </a>
+                    <a href="vote.html" class="btn btn-primary">
+                        <i class="fas fa-vote-yea"></i> Vote Again
+                    </a>
+                </div>
+                <a href="index.html" class="back-home"><i class="fas fa-home"></i> Back to Home</a>
+            </div>
+
+            <!-- Error State -->
+            <div id="errorState" class="hidden">
+                <div class="success-icon error-icon">
+                    <i class="fas fa-times"></i>
+                </div>
+                <h1>Payment Failed</h1>
+                <p class="subtitle" id="errorMessage">We couldn't verify your payment. Please contact support if money was deducted.</p>
+                <div class="button-group">
+                    <a href="vote.html" class="btn btn-primary">Try Again</a>
+                    <a href="index.html" class="btn btn-outline">Go Home</a>
+                </div>
+                <a href="support.html" class="back-home"><i class="fas fa-headset"></i> Contact Support</a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 TekVotes. All rights reserved. | Powered by Paystack</p>
+        </div>
+    </footer>
+
+    <script>
+        const API_URL = window.location.origin + '/api';
+
+        async function verifyPayment() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const reference = urlParams.get('reference');
+            
+            if (!reference) {
+                showError('No transaction reference found. Please contact support.');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/payments/verify/${reference}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    displaySuccess(result.data);
+                } else {
+                    showError(result.message || 'Payment verification failed. Please contact support.');
+                }
+            } catch (error) {
+                console.error('Verification error:', error);
+                showError('Failed to verify payment. Please contact support with your transaction reference.');
+            }
+        }
+
+        function displaySuccess(data) {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('successState').classList.remove('hidden');
+            
+            document.getElementById('receiptContestant').textContent = data.contestant_name || '—';
+            document.getElementById('receiptVotes').textContent = data.votes_added || '—';
+            document.getElementById('receiptVoterName').textContent = data.voter_name || '—';
+            document.getElementById('receiptEmail').textContent = data.voter_email || '—';
+            document.getElementById('receiptAmount').textContent = formatCurrency(data.amount_paid || 0);
+            document.getElementById('receiptRef').textContent = data.reference || '—';
+            document.getElementById('receiptDate').textContent = formatDate(data.transaction_date || new Date());
+        }
+
+        function showError(message) {
+            document.getElementById('loadingState').classList.add('hidden');
+            document.getElementById('errorState').classList.remove('hidden');
+            document.getElementById('errorMessage').textContent = message;
+        }
+
+        function formatCurrency(amount, currency = 'GHS') {
+            return new Intl.NumberFormat('en-GH', { style: 'currency', currency: currency }).format(amount || 0);
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return new Date().toLocaleString();
+            return date.toLocaleString();
+        }
+
+        // Start verification
+        document.addEventListener('DOMContentLoaded', verifyPayment);
+    </script>
+</body>
+</html>

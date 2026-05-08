@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Nominate Contestant — TekVotes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f9fafb; color: #111827; }
+        
+        .container { max-width: 1280px; width: 90%; margin: 0 auto; }
+        
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1rem 0;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .nav-container {
+            max-width: 1280px;
+            width: 90%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: #111;
+        }
+        .logo-accent { color: #D4AF37; }
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .nav-link { text-decoration: none; font-weight: 500; color: #6b7280; transition: color 0.3s; }
+        .nav-link:hover, .nav-link.active { color: #D4AF37; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            border-radius: 0.75rem;
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #D4AF37, #E8C860);
+            color: #111;
+        }
+        .btn-primary:hover { transform: translateY(-2px); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-outline { background: transparent; border: 2px solid #e5e7eb; color: #374151; }
+        .btn-outline:hover { border-color: #D4AF37; color: #D4AF37; }
+        .btn-block { width: 100%; justify-content: center; }
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+        .hamburger span { width: 25px; height: 2px; background: #111; transition: 0.3s; }
+        
+        /* Nominate Header */
+        .nominate-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8rem 0 4rem;
+            text-align: center;
+        }
+        .nominate-header h1 { font-size: 3rem; margin-bottom: 1rem; }
+        
+        /* Form */
+        .nominate-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 3rem 1.5rem 5rem;
+        }
+        .nominate-form {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+        .form-section {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .form-section h3 {
+            margin-bottom: 1.5rem;
+            color: #111;
+        }
+        .form-section h3 i { color: #D4AF37; margin-right: 0.5rem; }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #D4AF37;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+        
+        /* Photo Upload */
+        .photo-upload {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .photo-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 1rem;
+            border: 3px solid #D4AF37;
+            background: #f3f4f6;
+        }
+        .upload-btn {
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #f3f4f6;
+            border-radius: 0.5rem;
+            color: #374151;
+        }
+        
+        .info-card {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1rem;
+        }
+        .info-card i { font-size: 1.5rem; color: #22c55e; }
+        
+        /* Footer */
+        .footer {
+            background: #111;
+            color: #9ca3af;
+            padding: 3rem 0 1.5rem;
+            margin-top: 3rem;
+        }
+        .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1.5fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        .footer-bottom {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .toast-container {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 9999;
+        }
+        .toast {
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            background: white;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            margin-bottom: 0.5rem;
+            border-left: 4px solid;
+            animation: slideIn 0.3s ease;
+        }
+        .toast.success { border-left-color: #10b981; }
+        .toast.error { border-left-color: #ef4444; }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .loader-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        @media (max-width: 768px) {
+            .nominate-header h1 { font-size: 2rem; }
+            .form-row { grid-template-columns: 1fr; }
+            .nominate-form { padding: 1.5rem; }
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 70%;
+                height: 100vh;
+                background: white;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                transition: right 0.3s;
+                box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+                z-index: 999;
+            }
+            .nav-links.active { right: 0; }
+            .hamburger { display: flex; }
+            .footer-content { grid-template-columns: 1fr; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">👑 Tek<span class="logo-accent">Votes</span></a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="contestants.html" class="nav-link">Contestants</a></li>
+                <li><a href="events.html" class="nav-link">Events</a></li>
+                <li><a href="results.html" class="nav-link">Live Results</a></li>
+                <li><a href="nominate.html" class="nav-link active">Nominate</a></li>
+                <li><a href="vote.html" class="nav-link">Vote Now</a></li>
+                <li><a href="admin-login.html" class="nav-link">Admin</a></li>
+            </ul>
+            <a href="vote.html" class="btn btn-primary">Vote Now</a>
+            <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <!-- Nominate Header -->
+    <section class="nominate-header">
+        <div class="container">
+            <h1><i class="fas fa-star"></i> Nominate a Contestant</h1>
+            <p>Know someone who deserves to be in the spotlight? Nominate them for an event!</p>
+        </div>
+    </section>
+
+    <!-- Nomination Form -->
+    <div class="nominate-container">
+        <div class="nominate-form">
+            <div class="info-card">
+                <i class="fas fa-info-circle"></i>
+                <div>
+                    <strong>How Nominations Work</strong><br>
+                    Submit a nomination with contestant details and photo. Our team will review and contact the nominee.
+                    You will receive email confirmation once your nomination is processed.
+                </div>
+            </div>
+
+            <form id="nominationForm" enctype="multipart/form-data">
+                <!-- Contestant Information -->
+                <div class="form-section">
+                    <h3><i class="fas fa-user-circle"></i> Contestant Information</h3>
+                    
+                    <div class="photo-upload">
+                        <img id="photoPreview" class="photo-preview" src="https://placehold.co/150x150/eee/333?text=Photo">
+                        <label class="upload-btn">
+                            <i class="fas fa-camera"></i> Upload Photo
+                            <input type="file" id="contestantPhoto" name="photo" accept="image/*" style="display: none;" onchange="previewPhoto(this)">
+                        </label>
+                        <small style="display: block; margin-top: 0.5rem;">Upload a clear photo of the contestant (Max 5MB)</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" id="contestantName" placeholder="Enter contestant's full name" required>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Phone Number *</label>
+                            <input type="tel" id="contestantPhone" placeholder="+233 XX XXX XXXX" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email Address</label>
+                            <input type="email" id="contestantEmail" placeholder="contestant@email.com">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event Selection -->
+                <div class="form-section">
+                    <h3><i class="fas fa-calendar-alt"></i> Select Event & Category</h3>
+                    <div class="form-group">
+                        <label>Event *</label>
+                        <select id="eventId" required>
+                            <option value="">-- Select Event --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Category *</label>
+                        <select id="categoryId" required disabled>
+                            <option value="">-- First select an event --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Why should they be nominated? *</label>
+                        <textarea id="nominationReason" rows="4" placeholder="Tell us why this person deserves to be a contestant..." required></textarea>
+                    </div>
+                </div>
+
+                <!-- Your Information -->
+                <div class="form-section">
+                    <h3><i class="fas fa-user-check"></i> Your Information</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Your Name *</label>
+                            <input type="text" id="nominatorName" placeholder="Your full name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Your Email *</label>
+                            <input type="email" id="nominatorEmail" placeholder="your@email.com" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Your Phone Number</label>
+                        <input type="tel" id="nominatorPhone" placeholder="+233 XX XXX XXXX">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block" id="submitBtn">
+                    <span id="submitBtnText">Submit Nomination</span>
+                    <div id="submitLoader" class="loader-spinner" style="display: none;"></div>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <a href="index.html" class="nav-logo" style="color:white;">👑 Tek<span class="logo-accent">Votes</span></a>
+                    <p>The premier online voting platform for beauty pageants.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul><li><a href="contestants.html">Contestants</a></li><li><a href="events.html">Events</a></li><li><a href="results.html">Live Results</a></li></ul>
+                </div>
+                <div class="footer-contact">
+                    <h4>Contact</h4>
+                    <p><i class="fas fa-envelope"></i> support@tekvotes.com</p>
+                    <p><i class="fas fa-phone"></i> +233 XX XXX XXXX</p>
+                </div>
+            </div>
+            <div class="footer-bottom"><p>&copy; 2024 TekVotes. All rights reserved. | Powered by Paystack</p></div>
+        </div>
+    </footer>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        const API_URL = window.location.origin + '/api';
+
+        // Preview photo before upload
+        function previewPhoto(input) {
+            const preview = document.getElementById('photoPreview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => preview.src = e.target.result;
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Load events for dropdown
+        async function loadEvents() {
+            try {
+                const response = await fetch(`${API_URL}/events`);
+                const result = await response.json();
+                if (result.success && result.data) {
+                    const select = document.getElementById('eventId');
+                    select.innerHTML = '<option value="">-- Select Event --</option>' + 
+                        result.data.filter(e => e.is_active === 1).map(e => `<option value="${e.id}">${escapeHtml(e.event_name)}</option>`).join('');
+                }
+            } catch (error) {
+                console.error('Error loading events:', error);
+                showToast('Error loading events', 'error');
+            }
+        }
+
+        // Load categories for selected event
+        async function loadCategories(eventId) {
+            const categorySelect = document.getElementById('categoryId');
+            categorySelect.innerHTML = '<option value="">Loading...</option>';
+            categorySelect.disabled = true;
+            
+            try {
+                const response = await fetch(`${API_URL}/categories/event/${eventId}`);
+                const result = await response.json();
+                if (result.success && result.data && result.data.length > 0) {
+                    categorySelect.innerHTML = '<option value="">-- Select Category --</option>' + 
+                        result.data.map(c => `<option value="${c.id}">${escapeHtml(c.category_name)}</option>`).join('');
+                    categorySelect.disabled = false;
+                } else {
+                    categorySelect.innerHTML = '<option value="">No categories available for this event</option>';
+                    categorySelect.disabled = true;
+                    showToast('Please create categories for this event first', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading categories:', error);
+                categorySelect.innerHTML = '<option value="">Error loading categories</option>';
+                categorySelect.disabled = true;
+            }
+        }
+
+        // Handle event selection change
+        document.getElementById('eventId').addEventListener('change', (e) => {
+            const eventId = e.target.value;
+            if (eventId) {
+                loadCategories(eventId);
+            } else {
+                const categorySelect = document.getElementById('categoryId');
+                categorySelect.innerHTML = '<option value="">-- First select an event --</option>';
+                categorySelect.disabled = true;
+            }
+        });
+
+        // Handle form submission
+        document.getElementById('nominationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('contestant_name', document.getElementById('contestantName').value.trim());
+            formData.append('contestant_phone', document.getElementById('contestantPhone').value.trim());
+            formData.append('contestant_email', document.getElementById('contestantEmail').value.trim());
+            formData.append('event_id', document.getElementById('eventId').value);
+            formData.append('category_id', document.getElementById('categoryId').value);
+            formData.append('nominator_name', document.getElementById('nominatorName').value.trim());
+            formData.append('nominator_email', document.getElementById('nominatorEmail').value.trim());
+            formData.append('nominator_phone', document.getElementById('nominatorPhone').value.trim());
+            formData.append('reason', document.getElementById('nominationReason').value.trim());
+            
+            const photo = document.getElementById('contestantPhoto').files[0];
+            if (photo) formData.append('photo', photo);
+            
+            // Validate required fields
+            if (!formData.get('contestant_name') || !formData.get('event_id') || !formData.get('category_id') || 
+                !formData.get('nominator_name') || !formData.get('nominator_email') || !formData.get('reason')) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(formData.get('nominator_email'))) {
+                showToast('Please enter a valid email address', 'error');
+                return;
+            }
+            
+            const phoneRegex = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,10}$/;
+            if (formData.get('contestant_phone') && !phoneRegex.test(formData.get('contestant_phone'))) {
+                showToast('Please enter a valid phone number', 'error');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const submitBtnText = document.getElementById('submitBtnText');
+            const submitLoader = document.getElementById('submitLoader');
+            
+            submitBtnText.style.display = 'none';
+            submitLoader.style.display = 'inline-block';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch(`${API_URL}/nominations`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('✅ Nomination submitted successfully! We will review it and contact the nominee.', 'success');
+                    document.getElementById('nominationForm').reset();
+                    document.getElementById('photoPreview').src = 'https://placehold.co/150x150/eee/333?text=Photo';
+                    document.getElementById('categoryId').innerHTML = '<option value="">-- First select an event --</option>';
+                    document.getElementById('categoryId').disabled = true;
+                } else {
+                    showToast(result.message || 'Submission failed. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Submission error:', error);
+                showToast('Error submitting nomination. Please try again.', 'error');
+            } finally {
+                submitBtnText.style.display = 'inline-block';
+                submitLoader.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+
+        function showToast(message, type) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+        }
+
+        function initNavbar() {
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) navbar.classList.add('scrolled');
+                else navbar.classList.remove('scrolled');
+            });
+        }
+
+        function initMobileMenu() {
+            const hamburger = document.getElementById('hamburger');
+            const navLinks = document.getElementById('navLinks');
+            if (hamburger) {
+                hamburger.addEventListener('click', () => {
+                    hamburger.classList.toggle('active');
+                    navLinks.classList.toggle('active');
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadEvents();
+            initNavbar();
+            initMobileMenu();
+        });
+    </script>
+</body>
+</html>

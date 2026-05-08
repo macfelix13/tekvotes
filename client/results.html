@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Results — TekVotes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f9fafb; color: #111827; }
+        .container { max-width: 1280px; width: 90%; margin: 0 auto; }
+        
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1rem 0;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .nav-container {
+            max-width: 1280px;
+            width: 90%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: #111;
+        }
+        .logo-accent { color: #D4AF37; }
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .nav-link { text-decoration: none; font-weight: 500; color: #6b7280; transition: color 0.3s; }
+        .nav-link:hover, .nav-link.active { color: #D4AF37; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            border-radius: 0.75rem;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .btn-primary { background: linear-gradient(135deg, #D4AF37, #E8C860); color: #111; }
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+        .hamburger span { width: 25px; height: 2px; background: #111; transition: 0.3s; }
+        
+        /* Results Header */
+        .results-header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            padding: 8rem 0 4rem;
+            text-align: center;
+        }
+        .results-header h1 { font-size: 3rem; margin-bottom: 1rem; }
+        
+        /* Event Selector */
+        .event-selector {
+            max-width: 300px;
+            margin: -1.5rem auto 2rem;
+        }
+        .event-selector select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            font-size: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        
+        /* Category Section */
+        .category-section {
+            margin-bottom: 3rem;
+        }
+        .category-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #D4AF37;
+        }
+        .category-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #111;
+        }
+        .category-title i { color: #D4AF37; margin-right: 0.5rem; }
+        
+        /* Results Table */
+        .results-table {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+        }
+        .results-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .results-table th, .results-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .results-table th { background: #f9fafb; font-weight: 600; }
+        .results-table tr:hover { background: #f9fafb; }
+        
+        .rank-cell { font-weight: 700; width: 60px; }
+        .rank-1 { color: #D4AF37; font-size: 1.25rem; }
+        .rank-2 { color: #C0C0C0; }
+        .rank-3 { color: #CD7F32; }
+        
+        .contestant-cell {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .contestant-cell img {
+            width: 50px;
+            height: 50px;
+            border-radius: 0.5rem;
+            object-fit: cover;
+        }
+        .vote-count { font-weight: 700; color: #D4AF37; }
+        
+        .progress-bar {
+            width: 100px;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #D4AF37, #E8C860);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .last-updated {
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin: 2rem 0;
+        }
+        
+        /* Footer */
+        .footer {
+            background: #111;
+            color: #9ca3af;
+            padding: 3rem 0 1.5rem;
+            margin-top: 3rem;
+        }
+        .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1.5fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        .footer-bottom {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .loader-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e5e7eb;
+            border-top-color: #D4AF37;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 2rem auto;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: #6b7280;
+        }
+        
+        @media (max-width: 768px) {
+            .results-header h1 { font-size: 2rem; }
+            .contestant-cell img { width: 40px; height: 40px; }
+            .results-table th, .results-table td { padding: 0.75rem; font-size: 0.875rem; }
+            .progress-bar { width: 60px; }
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 70%;
+                height: 100vh;
+                background: white;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                transition: right 0.3s;
+                box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+                z-index: 999;
+            }
+            .nav-links.active { right: 0; }
+            .hamburger { display: flex; }
+            .footer-content { grid-template-columns: 1fr; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo"> Tek<span class="logo-accent">Votes</span></a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="contestants.html" class="nav-link">Contestants</a></li>
+                <li><a href="events.html" class="nav-link">Events</a></li>
+                <li><a href="results.html" class="nav-link active">Live Results</a></li>
+                <li><a href="nominate.html" class="nav-link">Nominate</a></li>
+                <li><a href="vote.html" class="nav-link">Vote Now</a></li>
+                <li><a href="admin-login.html" class="nav-link">Admin</a></li>
+            </ul>
+            <a href="vote.html" class="btn btn-primary">Vote Now</a>
+            <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <!-- Results Header -->
+    <section class="results-header">
+        <div class="container">
+            <h1><i class="fas fa-trophy"></i> Live Results</h1>
+            <p>Real-time voting results updated instantly as votes come in</p>
+        </div>
+    </section>
+
+    <!-- Event Selector -->
+    <div class="container">
+        <div class="event-selector">
+            <select id="eventSelect">
+                <option value="">-- Select Event --</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Results Container -->
+    <div class="container" id="resultsContainer">
+        <div class="loader-spinner"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <a href="index.html" class="nav-logo" style="color:white;"> Tek<span class="logo-accent">Votes</span></a>
+                    <p>The premier online voting platform for beauty pageants.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Quick Links</h4>
+                    <ul><li><a href="contestants.html">Contestants</a></li><li><a href="events.html">Events</a></li><li><a href="results.html">Live Results</a></li></ul>
+                </div>
+                <div class="footer-contact">
+                    <h4>Contact</h4>
+                    <p><i class="fas fa-envelope"></i> support@tekvotes.com</p>
+                    <p><i class="fas fa-phone"></i> +233 XX XXX XXXX</p>
+                </div>
+            </div>
+            <div class="footer-bottom"><p>&copy; 2024 TekVotes. All rights reserved.</p></div>
+        </div>
+    </footer>
+
+    <script>
+        const API_URL = window.location.origin + '/api';
+        let autoRefreshInterval = null;
+        let currentEventId = null;
+
+        async function loadEvents() {
+            try {
+                const response = await fetch(`${API_URL}/events`);
+                const result = await response.json();
+                if (result.success && result.data) {
+                    const select = document.getElementById('eventSelect');
+                    select.innerHTML = '<option value="">-- Select Event --</option>' + 
+                        result.data.map(e => `<option value="${e.id}">${escapeHtml(e.event_name)}</option>`).join('');
+                }
+            } catch (error) {
+                console.error('Error loading events:', error);
+            }
+        }
+
+        async function loadResults(eventId) {
+            const container = document.getElementById('resultsContainer');
+            container.innerHTML = '<div class="loader-spinner"></div>';
+            
+            try {
+                const response = await fetch(`${API_URL}/results/event/${eventId}`);
+                const result = await response.json();
+                console.log('Results response:', result);
+                
+                if (result.success && result.data && result.data.results) {
+                    displayResults(result.data);
+                } else {
+                    container.innerHTML = '<div class="no-results">No results available for this event yet.</div>';
+                }
+            } catch (error) {
+                console.error('Error loading results:', error);
+                container.innerHTML = '<div class="no-results" style="color:red;">Error loading results. Please try again.</div>';
+            }
+        }
+
+        function displayResults(data) {
+            const container = document.getElementById('resultsContainer');
+            const results = data.results;
+            
+            if (Object.keys(results).length === 0) {
+                container.innerHTML = '<div class="no-results">No results available for this event yet.</div>';
+                return;
+            }
+            
+            let html = '';
+            
+            for (const [categoryName, contestants] of Object.entries(results)) {
+                const maxVotes = contestants.length > 0 ? Math.max(...contestants.map(c => c.votes)) : 0;
+                
+                html += `
+                    <div class="category-section">
+                        <div class="category-header">
+                            <div class="category-title">
+                                <i class="fas fa-star"></i> ${escapeHtml(categoryName)}
+                            </div>
+                            <div>${contestants.length} Contestants</div>
+                        </div>
+                        <div class="results-table">
+                            <table>
+                                <thead>
+                                    <tr><th>Rank</th><th>Contestant</th><th>Votes</th><th>Progress</th></tr>
+                                </thead>
+                                <tbody>
+                                    ${contestants.map((c, idx) => {
+                                        const rank = idx + 1;
+                                        const percentage = maxVotes > 0 ? (c.votes / maxVotes) * 100 : 0;
+                                        let rankClass = '';
+                                        if (rank === 1) rankClass = 'rank-1';
+                                        else if (rank === 2) rankClass = 'rank-2';
+                                        else if (rank === 3) rankClass = 'rank-3';
+                                        
+                                        return `
+                                            <tr>
+                                                <td class="rank-cell"><span class="${rankClass}">${rank === 1 ? '🏆' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank}</span></td>
+                                                <td>
+                                                    <div class="contestant-cell">
+                                                        <img src="${c.image || 'https://placehold.co/50x50/1a1a1a/D4AF37?text=?'}" onerror="this.src='https://placehold.co/50x50/1a1a1a/D4AF37?text=?'">
+                                                        <div><strong>${escapeHtml(c.contestant_name)}</strong></div>
+                                                    </div>
+                                                </td>
+                                                <td class="vote-count">${c.votes.toLocaleString()} votes</td>
+                                                <td>
+                                                    <div class="progress-bar">
+                                                        <div class="progress-fill" style="width: ${percentage}%"></div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += `<div class="last-updated"><i class="fas fa-clock"></i> Last updated: ${new Date().toLocaleTimeString()}</div>`;
+            container.innerHTML = html;
+        }
+
+        function startAutoRefresh() {
+            if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+            autoRefreshInterval = setInterval(() => {
+                if (currentEventId) loadResults(currentEventId);
+            }, 30000);
+        }
+
+        document.getElementById('eventSelect').addEventListener('change', (e) => {
+            currentEventId = e.target.value;
+            if (currentEventId) {
+                loadResults(currentEventId);
+                startAutoRefresh();
+            } else {
+                document.getElementById('resultsContainer').innerHTML = '<div class="no-results">Select an event to view results.</div>';
+                if (autoRefreshInterval) clearInterval(autoRefreshInterval);
+            }
+        });
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
+        }
+
+        function initNavbar() {
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) navbar.classList.add('scrolled');
+                else navbar.classList.remove('scrolled');
+            });
+        }
+
+        function initMobileMenu() {
+            const hamburger = document.getElementById('hamburger');
+            const navLinks = document.getElementById('navLinks');
+            if (hamburger) {
+                hamburger.addEventListener('click', () => {
+                    hamburger.classList.toggle('active');
+                    navLinks.classList.toggle('active');
+                });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadEvents();
+            initNavbar();
+            initMobileMenu();
+        });
+    </script>
+</body>
+</html>

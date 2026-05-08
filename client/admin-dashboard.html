@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard — TekVotes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f3f4f6; }
+        
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100vh;
+            background: #111;
+            color: white;
+            z-index: 100;
+            transition: all 0.3s;
+            overflow-y: auto;
+        }
+        .sidebar-header { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-logo { font-size: 1.5rem; font-weight: 700; text-decoration: none; color: white; display: block; }
+        .sidebar-logo span { color: #D4AF37; }
+        .sidebar-nav { padding: 1rem 0; }
+        .sidebar-nav ul { list-style: none; }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem 1.5rem;
+            color: #9ca3af;
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .sidebar-link:hover, .sidebar-link.active {
+            background: rgba(212, 175, 55, 0.1);
+            color: #D4AF37;
+            border-left: 3px solid #D4AF37;
+        }
+        .sidebar-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .btn-logout {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(239,68,68,0.1);
+            border: none;
+            border-radius: 0.5rem;
+            color: #ef4444;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .btn-logout:hover { background: rgba(239,68,68,0.2); }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            padding: 1rem 2rem;
+        }
+        .dashboard-header {
+            background: white;
+            border-radius: 1rem;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .header-left { display: flex; align-items: center; gap: 1rem; }
+        .sidebar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            cursor: pointer;
+        }
+        .view-site-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #f3f4f6;
+            border-radius: 0.5rem;
+            color: #374151;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .view-site-btn:hover { background: #D4AF37; color: #111; }
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+        .stat-info h3 { font-size: 1.5rem; margin-bottom: 0.25rem; }
+        .stat-info p { color: #6b7280; font-size: 0.875rem; }
+        
+        /* Charts Row */
+        .charts-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .chart-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .chart-header h3 { font-size: 1rem; font-weight: 600; }
+        canvas { max-height: 250px; width: 100% !important; }
+        
+        /* Tables */
+        .table-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .table-search {
+            padding: 0.5rem 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            width: 250px;
+        }
+        .table-responsive { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        th { background: #f9fafb; font-weight: 600; }
+        tr:hover { background: #f9fafb; }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-active { background: #d1fae5; color: #065f46; }
+        .status-inactive { background: #fee2e2; color: #991b1b; }
+        .status-success { background: #d1fae5; color: #065f46; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-failed { background: #fee2e2; color: #991b1b; }
+        .status-error { background: #fee2e2; color: #991b1b; }
+        
+        .btn-edit, .btn-delete {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            font-size: 1rem;
+        }
+        .btn-edit { color: #3b82f6; }
+        .btn-delete { color: #ef4444; }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-primary { background: #D4AF37; color: #111; }
+        .btn-primary:hover { background: #c4a02e; }
+        .btn-outline { background: transparent; border: 1px solid #e5e7eb; }
+        .btn-danger { background: #ef4444; color: white; }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal {
+            background: white;
+            border-radius: 1rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-body { padding: 1.5rem; }
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            font-family: inherit;
+        }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .image-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 0.5rem;
+            object-fit: cover;
+            margin-bottom: 0.5rem;
+            background: #f3f4f6;
+        }
+        .hidden { display: none !important; }
+        
+        /* Dashboard Sections */
+        .dashboard-section { display: none; }
+        .dashboard-section.active { display: block; }
+        
+        /* Events Grid */
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+        .event-card {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .event-card:hover { transform: translateY(-3px); }
+        .event-image {
+            height: 180px;
+            overflow: hidden;
+        }
+        .event-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .event-info { padding: 1rem; }
+        .event-title { font-weight: 700; margin-bottom: 0.25rem; font-size: 1.1rem; }
+        .event-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+        
+        /* Progress Bar */
+        .progress-bar {
+            width: 100px;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: #D4AF37;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+        
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 9999;
+        }
+        .toast {
+            padding: 0.75rem 1.25rem;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            margin-bottom: 0.5rem;
+            border-left: 4px solid;
+            animation: slideIn 0.3s ease;
+        }
+        .toast.success { border-left-color: #10b981; }
+        .toast.error { border-left-color: #ef4444; }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .loader-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e5e7eb;
+            border-top-color: #D4AF37;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 1rem auto;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .export-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        small { display: block; margin-top: 0.25rem; }
+        
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); z-index: 1001; }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 1rem; }
+            .sidebar-toggle { display: inline-block; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .charts-row { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+            .events-grid { grid-template-columns: 1fr; }
+            .export-buttons { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="#" class="sidebar-logo">👑 Tek<span>Votes</span></a>
+        </div>
+        <nav class="sidebar-nav">
+            <ul>
+                <li><a class="sidebar-link active" data-section="overview"><i class="fas fa-chart-line"></i> Overview</a></li>
+                <li><a class="sidebar-link" data-section="contestants"><i class="fas fa-users"></i> Contestants</a></li>
+                <li><a class="sidebar-link" data-section="events"><i class="fas fa-calendar"></i> Events</a></li>
+                <li><a class="sidebar-link" data-section="categories"><i class="fas fa-tags"></i> Categories</a></li>
+                <li><a class="sidebar-link" data-section="transactions"><i class="fas fa-credit-card"></i> Transactions</a></li>
+                <li><a class="sidebar-link" data-section="results"><i class="fas fa-chart-bar"></i> Results & Analytics</a></li>
+            </ul>
+        </nav>
+        <div class="sidebar-footer">
+            <button class="btn-logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="dashboard-header">
+            <div class="header-left">
+                <button class="sidebar-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></button>
+                <span id="breadcrumb">Dashboard</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <a href="index.html" class="view-site-btn" target="_blank"><i class="fas fa-external-link-alt"></i> View Website</a>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fas fa-user-circle" style="font-size: 1.5rem;"></i>
+                    <span id="adminName">Admin</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Overview Section -->
+        <section id="section-overview" class="dashboard-section active">
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-icon" style="background: #3b82f6;"><i class="fas fa-users"></i></div><div class="stat-info"><h3 id="totalContestants">0</h3><p>Total Contestants</p></div></div>
+                <div class="stat-card"><div class="stat-icon" style="background: #10b981;"><i class="fas fa-calendar"></i></div><div class="stat-info"><h3 id="totalEvents">0</h3><p>Total Events</p></div></div>
+                <div class="stat-card"><div class="stat-icon" style="background: #f59e0b;"><i class="fas fa-vote-yea"></i></div><div class="stat-info"><h3 id="totalVotes">0</h3><p>Total Votes</p></div></div>
+                <div class="stat-card"><div class="stat-icon" style="background: #D4AF37;"><i class="fas fa-money-bill"></i></div><div class="stat-info"><h3 id="totalRevenue">GHS 0</h3><p>Revenue</p></div></div>
+            </div>
+
+            <!-- Live Results Control Card - Super Admin Only -->
+            <div class="table-card" style="margin-bottom: 2rem; border-left: 4px solid #D4AF37;">
+                <div class="table-header">
+                    <h3><i class="fas fa-globe" style="color: #D4AF37;"></i> Live Results Control</h3>
+                    <div id="liveResultsControl">
+                        <button class="btn btn-outline" id="toggleLiveResultsBtn" onclick="toggleLiveResults()">
+                            <i class="fas fa-sync-alt"></i> Check Status
+                        </button>
+                    </div>
+                </div>
+                <div id="liveResultsStatus" style="padding: 0.75rem 0;">
+                    <span class="status-badge status-pending"><i class="fas fa-spinner fa-spin"></i> Loading status...</span>
+                </div>
+                <div id="adminRoleInfo" style="font-size: 0.75rem; color: #6b7280; margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px solid #e5e7eb;"></div>
+            </div>
+
+            <div class="charts-row">
+                <div class="chart-card">
+                    <div class="chart-header"><h3><i class="fas fa-chart-pie"></i> Contestants per Event</h3></div>
+                    <canvas id="eventContestantsChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><h3><i class="fas fa-chart-bar"></i> Top 5 Contestants</h3></div>
+                    <canvas id="votesChart"></canvas>
+                </div>
+            </div>
+
+            <div class="charts-row">
+                <div class="chart-card">
+                    <div class="chart-header"><h3><i class="fas fa-chart-line"></i> Revenue Trend</h3></div>
+                    <canvas id="revenueChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><h3><i class="fas fa-chart-pie"></i> Payment Status</h3></div>
+                    <canvas id="paymentStatusChart"></canvas>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-header">
+                    <h3>Recent Transactions</h3>
+                    <div class="export-buttons">
+                        <button class="btn btn-outline" onclick="exportToCSV()"><i class="fas fa-file-csv"></i> Export CSV</button>
+                        <button class="btn btn-outline" onclick="printReport()"><i class="fas fa-print"></i> Print</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table" id="transactionsTable">
+                        <thead><tr><th>Voter</th><th>Email</th><th>Contestant</th><th>Event</th><th>Votes</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+                        <tbody id="recentTransactionsBody"><tr><td colspan="8" style="text-align:center;"><div class="loader-spinner"></div></td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contestants Section -->
+        <section id="section-contestants" class="dashboard-section">
+            <div class="table-card">
+                <div class="table-header">
+                    <h3>Manage Contestants</h3>
+                    <div>
+                        <input type="text" class="table-search" id="searchContestant" placeholder="Search contestants...">
+                        <button class="btn btn-primary" id="addContestantBtn" style="margin-left: 0.5rem;"><i class="fas fa-plus"></i> Add Contestant</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead><tr><th>Photo</th><th>Name</th><th>Category</th><th>Event</th><th>Votes</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody id="contestantsTable"><tr><td colspan="7" style="text-align:center;"><div class="loader-spinner"></div></td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Events Section -->
+        <section id="section-events" class="dashboard-section">
+            <div class="table-header" style="margin-bottom: 1rem;">
+                <h3>Manage Events</h3>
+                <button class="btn btn-primary" id="addEventBtn"><i class="fas fa-plus"></i> Add Event</button>
+            </div>
+            <div class="events-grid" id="eventsGrid"><div class="loader-spinner"></div></div>
+        </section>
+
+        <!-- Categories Section -->
+        <section id="section-categories" class="dashboard-section">
+            <div class="table-card">
+                <div class="table-header">
+                    <h3>Manage Categories</h3>
+                    <button class="btn btn-primary" id="addCategoryBtn"><i class="fas fa-plus"></i> Add Category</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead><td><th>Category Name</th><th>Event</th><th>Sort Order</th><th>Status</th><th>Actions</th></tr></thead>
+                        <tbody id="categoriesTable"><tr><td colspan="5" style="text-align:center;"><div class="loader-spinner"></div></td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Transactions Section -->
+        <section id="section-transactions" class="dashboard-section">
+            <div class="table-card">
+                <div class="table-header">
+                    <h3>All Transactions</h3>
+                    <div>
+                        <input type="text" class="table-search" id="searchTransaction" placeholder="Search transactions...">
+                        <div class="export-buttons" style="margin-top: 0.5rem;">
+                            <button class="btn btn-outline" onclick="exportTransactionsToCSV()"><i class="fas fa-file-csv"></i> Export CSV</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table" id="allTransactionsTable">
+                        <thead><tr><th>#</th><th>Voter</th><th>Email</th><th>Contestant</th><th>Event</th><th>Votes</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+                        <tbody id="transactionsTableBody"><tr><td colspan="9" style="text-align:center;"><div class="loader-spinner"></div></td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results & Analytics Section -->
+        <section id="section-results" class="dashboard-section">
+            <div class="charts-row">
+                <div class="chart-card">
+                    <div class="chart-header"><h3><i class="fas fa-chart-pie"></i> Contestants by Category</h3></div>
+                    <canvas id="categoryChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-header"><h3><i class="fas fa-chart-line"></i> Daily Votes Trend</h3></div>
+                    <canvas id="dailyVotesChart"></canvas>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="table-header">
+                    <h3><i class="fas fa-trophy"></i> Event Winners / Leaderboard</h3>
+                    <div class="export-buttons">
+                        <select id="eventFilterSelect" class="table-search" style="width: auto;">
+                            <option value="all">All Events</option>
+                        </select>
+                        <button class="btn btn-outline" onclick="exportResultsToCSV()"><i class="fas fa-file-csv"></i> Export Results</button>
+                        <button class="btn btn-primary" onclick="generateResultsReport()"><i class="fas fa-file-pdf"></i> Generate Report</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table" id="resultsTable">
+                        <thead><tr><th>Rank</th><th>Contestant</th><th>Event</th><th>Category</th><th>Votes</th><th>Percentage</th><th>Status</th></tr></thead>
+                        <tbody id="resultsTableBody"><td><td colspan="7" style="text-align:center;"><div class="loader-spinner"></div></td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Contestant Modal -->
+    <div id="contestantModal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header"><h3 id="contestantModalTitle">Add Contestant</h3><button class="modal-close" onclick="closeModal('contestantModal')"><i class="fas fa-times"></i></button></div>
+            <form id="contestantForm" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" id="contestantId">
+                    <div style="text-align: center;">
+                        <img id="contestantImagePreview" class="image-preview" src="https://placehold.co/100x100/eee/333?text=Photo" style="width:100px; height:100px; border-radius:50%;">
+                        <br><label class="btn btn-outline" style="cursor:pointer; margin-top:0.5rem;"><i class="fas fa-upload"></i> Upload Image<input type="file" id="contestantImage" accept="image/*" style="display: none;" onchange="previewImage(this, 'contestantImagePreview')"></label>
+                    </div>
+                    <div class="form-group"><label>Full Name *</label><input type="text" id="contestantFullName" required></div>
+                    <div class="form-group"><label>Select Event *</label><select id="contestantEventId" required><option value="">-- Select Event First --</option></select></div>
+                    <div class="form-group"><label>Select Category *</label><select id="contestantCategoryId" required disabled><option value="">-- Select Event First --</option></select></div>
+                    <div class="form-group"><label>Biography</label><textarea id="contestantBio" rows="4"></textarea></div>
+                    <div class="form-row"><div class="form-group"><label><i class="fab fa-instagram"></i> Instagram</label><input type="text" id="contestantInstagram"></div><div class="form-group"><label><i class="fab fa-tiktok"></i> TikTok</label><input type="text" id="contestantTiktok"></div></div>
+                    <div class="form-group"><label><i class="fab fa-facebook"></i> Facebook</label><input type="text" id="contestantFacebook"></div>
+                    <div class="form-group"><label>Status</label><select id="contestantStatus"><option value="1">Active</option><option value="0">Inactive</option></select></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-outline" onclick="closeModal('contestantModal')">Cancel</button><button type="submit" class="btn btn-primary">Save Contestant</button></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Event Modal -->
+    <div id="eventModal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header"><h3 id="eventModalTitle">Add Event</h3><button class="modal-close" onclick="closeModal('eventModal')"><i class="fas fa-times"></i></button></div>
+            <form id="eventForm" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <input type="hidden" id="eventId">
+                    <div style="text-align: center; margin-bottom: 1rem;">
+                        <img id="eventImagePreview" class="image-preview" src="https://placehold.co/300x150/eee/333?text=Event+Image" style="width:100%; max-width:300px; height:150px; object-fit:cover;">
+                        <br><label class="btn btn-outline" style="cursor:pointer; margin-top:0.5rem;"><i class="fas fa-upload"></i> Upload Event Image<input type="file" id="eventImage" accept="image/*" style="display: none;" onchange="previewEventImage(this, 'eventImagePreview')"></label>
+                    </div>
+                    <div class="form-group"><label>Event Name *</label><input type="text" id="eventName" required></div>
+                    <div class="form-group"><label>Description</label><textarea id="eventDescription" rows="3"></textarea></div>
+                    <div class="form-row"><div class="form-group"><label>Start Date *</label><input type="datetime-local" id="eventStartDate" required></div><div class="form-group"><label>End Date *</label><input type="datetime-local" id="eventEndDate" required></div></div>
+                    <div class="form-row"><div class="form-group"><label>Vote Price (GHS)</label><input type="number" id="eventVotePrice" step="0.01" value="1.00"></div><div class="form-group"><label>Currency</label><select id="eventCurrency"><option value="GHS">GHS</option><option value="USD">USD</option><option value="EUR">EUR</option></select></div></div>
+                    <div class="form-group"><label>Status</label><select id="eventStatus"><option value="1">Active</option><option value="0">Inactive</option></select></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-outline" onclick="closeModal('eventModal')">Cancel</button><button type="submit" class="btn btn-primary">Save Event</button></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div id="categoryModal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header"><h3 id="categoryModalTitle">Add Category</h3><button class="modal-close" onclick="closeModal('categoryModal')"><i class="fas fa-times"></i></button></div>
+            <form id="categoryForm">
+                <div class="modal-body">
+                    <input type="hidden" id="categoryId">
+                    <div class="form-group"><label>Category Name *</label><input type="text" id="categoryName" required></div>
+                    <div class="form-group"><label>Event *</label><select id="categoryEventId" required><option value="">-- Select Event --</option></select></div>
+                    <div class="form-group"><label>Description</label><textarea id="categoryDescription" rows="3"></textarea></div>
+                    <div class="form-group"><label>Sort Order</label><input type="number" id="categorySortOrder" value="0"></div>
+                    <div class="form-group"><label>Status</label><select id="categoryStatus"><option value="1">Active</option><option value="0">Inactive</option></select></div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-outline" onclick="closeModal('categoryModal')">Cancel</button><button type="submit" class="btn btn-primary">Save Category</button></div>
+            </form>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        const API_URL = window.location.origin + '/api';
+        let token = localStorage.getItem('adminToken');
+        
+        if (!token) window.location.href = 'admin-login.html';
+        document.getElementById('adminName').textContent = localStorage.getItem('adminName') || 'Admin';
+
+        // Chart variables
+        let eventContestantsChart, votesChart, revenueChart, paymentStatusChart, categoryChart, dailyVotesChart;
+
+        // Helper Functions
+        function showToast(message, type) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
+
+        function previewImage(input, previewId) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => document.getElementById(previewId).src = e.target.result;
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function previewEventImage(input, previewId) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => document.getElementById(previewId).src = e.target.result;
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        async function apiCall(endpoint, options = {}) {
+            const response = await fetch(`${API_URL}${endpoint}`, {
+                ...options,
+                headers: { 'Authorization': `Bearer ${token}`, ...options.headers }
+            });
+            return response.json();
+        }
+
+        // Format functions
+        function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
+        function formatDate(dateString) { if (!dateString) return 'N/A'; return new Date(dateString).toLocaleString(); }
+
+        // ============================================
+        // LIVE RESULTS CONTROL FUNCTIONS
+        // ============================================
+
+        function getAdminRole() {
+            const adminRole = localStorage.getItem('adminRole');
+            if (adminRole) return adminRole;
+            const token = localStorage.getItem('adminToken');
+            if (token) {
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    return payload.role;
+                } catch (e) { return null; }
+            }
+            return null;
+        }
+
+        function displayAdminRole() {
+            const role = getAdminRole();
+            const roleInfoDiv = document.getElementById('adminRoleInfo');
+            if (roleInfoDiv) {
+                if (role === 'super_admin') {
+                    roleInfoDiv.innerHTML = '<i class="fas fa-crown" style="color: #D4AF37;"></i> ✅ You are logged in as <strong>Super Administrator</strong> - You have full control to enable/disable live results';
+                } else {
+                    roleInfoDiv.innerHTML = '<i class="fas fa-user-shield"></i> ℹ️ You are logged in as <strong>Event Administrator</strong> - Live results control requires Super Admin privileges. Contact your super administrator.';
+                }
+            }
+        }
+
+        async function getLiveResultsStatus() {
+    try {
+        console.log('Fetching live results status...');
+        const response = await fetch(`${API_URL}/results/status`);
+        const result = await response.json();
+        console.log('Status response:', result);
+        
+        if (result.success) {
+            const isEnabled = result.data.live_results_enabled;
+            const statusDiv = document.getElementById('liveResultsStatus');
+            const toggleBtn = document.getElementById('toggleLiveResultsBtn');
+            const role = getAdminRole();
+            const isSuperAdmin = role === 'super_admin';
+            
+            if (isEnabled) {
+                statusDiv.innerHTML = `<span class="status-badge status-success"><i class="fas fa-check-circle"></i> 🟢 Live Results are <strong>ENABLED</strong> - Visitors can see real-time results</span>`;
+                if (toggleBtn && isSuperAdmin) {
+                    toggleBtn.innerHTML = '<i class="fas fa-toggle-on"></i> Disable Live Results';
+                } else if (toggleBtn) {
+                    toggleBtn.innerHTML = '<i class="fas fa-eye"></i> View Only';
+                    toggleBtn.disabled = true;
+                }
+            } else {
+                statusDiv.innerHTML = `<span class="status-badge status-inactive"><i class="fas fa-eye-slash"></i> 🔴 Live Results are <strong>DISABLED</strong> - Visitors cannot see results</span>`;
+                if (toggleBtn && isSuperAdmin) {
+                    toggleBtn.innerHTML = '<i class="fas fa-toggle-off"></i> Enable Live Results';
+                } else if (toggleBtn) {
+                    toggleBtn.innerHTML = '<i class="fas fa-eye-slash"></i> View Only';
+                    toggleBtn.disabled = true;
+                }
+            }
+        }
+    } catch (error) {
+        console.error('Error getting live results status:', error);
+        document.getElementById('liveResultsStatus').innerHTML = '<span class="status-badge status-error">❌ Error loading status: ' + error.message + '</span>';
+    }
+}
+
+        // Toggle live results (Super Admin only)
+async function toggleLiveResults() {
+    const role = getAdminRole();
+    if (role !== 'super_admin') {
+        showToast('⚠️ Only Super Admin can toggle live results', 'error');
+        return;
+    }
+    
+    const statusText = document.getElementById('liveResultsStatus').innerText;
+    const currentStatus = statusText.includes('ENABLED');
+    const newStatus = !currentStatus;
+    
+    const toggleBtn = document.getElementById('toggleLiveResultsBtn');
+    const originalHtml = toggleBtn.innerHTML;
+    toggleBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    toggleBtn.disabled = true;
+    
+    try {
+        const token = localStorage.getItem('adminToken');
+        console.log('Sending toggle request...');
+        
+        const response = await fetch(`${API_URL}/results/toggle-live`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ enabled: newStatus })
+        });
+        
+        console.log('Response status:', response.status);
+        const result = await response.json();
+        console.log('Response data:', result);
+        
+        if (result.success) {
+            showToast(`✅ Live results ${newStatus ? 'enabled' : 'disabled'} successfully`, 'success');
+            getLiveResultsStatus();
+        } else {
+            showToast(result.message || 'Failed to toggle live results', 'error');
+        }
+    } catch (error) {
+        console.error('Error toggling live results:', error);
+        showToast('❌ Error toggling live results: ' + error.message, 'error');
+    } finally {
+        toggleBtn.innerHTML = originalHtml;
+        toggleBtn.disabled = false;
+    }
+}
+
+        // ========== DASHBOARD LOADING ==========
+        async function loadDashboard() {
+            try {
+                const [contestantsRes, eventsRes, votesRes] = await Promise.all([
+                    fetch(`${API_URL}/contestants`).then(r => r.json()),
+                    fetch(`${API_URL}/events`).then(r => r.json()),
+                    fetch(`${API_URL}/votes`).then(r => r.json()).catch(() => ({ success: false, data: [] }))
+                ]);
+                
+                const totalContestants = contestantsRes.data?.length || 0;
+                const totalEvents = eventsRes.data?.length || 0;
+                const totalVotes = contestantsRes.data?.reduce((sum, c) => sum + (c.votes || 0), 0) || 0;
+                
+                document.getElementById('totalContestants').textContent = totalContestants;
+                document.getElementById('totalEvents').textContent = totalEvents;
+                document.getElementById('totalVotes').textContent = totalVotes.toLocaleString();
+                document.getElementById('totalRevenue').textContent = `GHS ${totalVotes}`;
+                
+                await loadEventContestantsChart(eventsRes.data, contestantsRes.data);
+                await loadVotesChart(contestantsRes.data);
+                await loadRevenueChart(votesRes.data || []);
+                await loadPaymentStatusChart(votesRes.data || []);
+                await loadRecentTransactions(votesRes.data || []);
+                await loadResultsData(contestantsRes.data, votesRes.data || []);
+            } catch (error) { console.error('Dashboard error:', error); }
+        }
+
+        // Charts
+        async function loadEventContestantsChart(events, contestants) {
+            const ctx = document.getElementById('eventContestantsChart')?.getContext('2d');
+            if (!ctx) return;
+            const counts = {};
+            events?.forEach(e => counts[e.event_name] = 0);
+            contestants?.forEach(c => { if (c.event_name && counts[c.event_name] !== undefined) counts[c.event_name]++; });
+            if (eventContestantsChart) eventContestantsChart.destroy();
+            eventContestantsChart = new Chart(ctx, {
+                type: 'pie',
+                data: { labels: Object.keys(counts), datasets: [{ data: Object.values(counts), backgroundColor: ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6'] }] },
+                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        async function loadVotesChart(contestants) {
+            const ctx = document.getElementById('votesChart')?.getContext('2d');
+            if (!ctx) return;
+            const top5 = [...(contestants || [])].sort((a,b) => (b.votes||0)-(a.votes||0)).slice(0,5);
+            if (votesChart) votesChart.destroy();
+            votesChart = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: top5.map(c => c.full_name?.substring(0,15)), datasets: [{ label: 'Votes', data: top5.map(c => c.votes||0), backgroundColor: '#D4AF37', borderRadius: 8 }] },
+                options: { responsive: true }
+            });
+        }
+
+        async function loadRevenueChart(votes) {
+            const ctx = document.getElementById('revenueChart')?.getContext('2d');
+            if (!ctx) return;
+            const daily = {};
+            votes?.forEach(v => { if(v.payment_status === 'success'){ const d = new Date(v.created_at).toLocaleDateString(); daily[d] = (daily[d]||0)+(v.amount_paid||0); } });
+            const labels = Object.keys(daily).slice(-7), data = Object.values(daily).slice(-7);
+            if (revenueChart) revenueChart.destroy();
+            revenueChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets: [{ label: 'Revenue (GHS)', data, borderColor: '#D4AF37', backgroundColor: 'rgba(212,175,55,0.1)', fill: true, tension: 0.4 }] },
+                options: { responsive: true }
+            });
+        }
+
+        async function loadPaymentStatusChart(votes) {
+            const ctx = document.getElementById('paymentStatusChart')?.getContext('2d');
+            if (!ctx) return;
+            const counts = { success:0, pending:0, failed:0 };
+            votes?.forEach(v => { if(counts[v.payment_status] !== undefined) counts[v.payment_status]++; });
+            if (paymentStatusChart) paymentStatusChart.destroy();
+            paymentStatusChart = new Chart(ctx, {
+                type: 'pie',
+                data: { labels: ['Success','Pending','Failed'], datasets: [{ data: [counts.success, counts.pending, counts.failed], backgroundColor: ['#10b981','#f59e0b','#ef4444'] }] },
+                options: { responsive: true }
+            });
+        }
+
+        async function loadRecentTransactions(votes) {
+            const tbody = document.getElementById('recentTransactionsBody');
+            if (!tbody) return;
+            const recent = (votes || []).filter(v => v.payment_status === 'success').slice(0,10);
+            tbody.innerHTML = recent.length ? recent.map(v => `
+                <tr>
+                    <td>${escapeHtml(v.voter_name || 'Anonymous')}</td>
+                    <td>${escapeHtml(v.voter_email || '-')}</td>
+                    <td>${escapeHtml(v.contestant_name || '-')}</td>
+                    <td>${escapeHtml(v.event_name || '-')}</td>
+                    <td>${v.votes_count || 0}</td>
+                    <td>GHS ${(v.amount_paid || 0).toFixed(2)}</td>
+                    <td>${formatDate(v.created_at)}</td>
+                    <td><span class="status-badge status-success">Success</span></td>
+                </tr>
+            `).join('') : '<tr><td colspan="8" style="text-align:center;">No transactions yet</td></tr>';
+        }
+
+        // ========== RESULTS & ANALYTICS ==========
+        async function loadResultsData(contestants, votes) {
+            if (!contestants) {
+                const res = await fetch(`${API_URL}/contestants`);
+                const data = await res.json();
+                contestants = data.data || [];
+            }
+            await loadCategoryChart(contestants);
+            await loadDailyVotesChart(votes || []);
+            await loadResultsTable(contestants);
+            await loadEventFilter(contestants);
+        }
+
+        async function loadCategoryChart(contestants) {
+            const ctx = document.getElementById('categoryChart')?.getContext('2d');
+            if (!ctx) return;
+            const counts = {};
+            contestants?.forEach(c => { const cat = c.category_name || 'Uncategorized'; counts[cat] = (counts[cat]||0)+1; });
+            if (categoryChart) categoryChart.destroy();
+            categoryChart = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: Object.keys(counts), datasets: [{ label: 'Contestants', data: Object.values(counts), backgroundColor: '#8b5cf6', borderRadius: 8 }] },
+                options: { responsive: true }
+            });
+        }
+
+        async function loadDailyVotesChart(votes) {
+            const ctx = document.getElementById('dailyVotesChart')?.getContext('2d');
+            if (!ctx) return;
+            const daily = {};
+            votes?.forEach(v => { if(v.payment_status === 'success'){ const d = new Date(v.created_at).toLocaleDateString(); daily[d] = (daily[d]||0)+(v.votes_count||0); } });
+            const labels = Object.keys(daily).slice(-7), data = Object.values(daily).slice(-7);
+            if (dailyVotesChart) dailyVotesChart.destroy();
+            dailyVotesChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: labels.length ? labels : ['No Data'], datasets: [{ label: 'Votes Cast', data: data.length ? data : [0], borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)', fill: true, tension: 0.4 }] },
+                options: { responsive: true }
+            });
+        }
+
+        async function loadResultsTable(contestants) {
+            const tbody = document.getElementById('resultsTableBody');
+            if (!tbody) return;
+            const sorted = [...(contestants || [])].sort((a,b) => (b.votes||0)-(a.votes||0));
+            const totalVotes = sorted.reduce((s,c) => s+(c.votes||0),0);
+            tbody.innerHTML = sorted.length ? sorted.map((c, idx) => `
+                <tr>
+                    <td><strong>${idx+1}</strong> ${idx===0?'🏆':idx===1?'🥈':idx===2?'🥉':''}</td>
+                    <td><div style="display:flex;align-items:center;gap:0.5rem;"><img src="${c.image||'https://placehold.co/40x40/eee/333?text=?'}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;" onerror="this.src='https://placehold.co/40x40/eee/333?text=?'">${escapeHtml(c.full_name)}</div></td>
+                    <td><span class="status-badge status-active">${escapeHtml(c.event_name||'-')}</span></td>
+                    <td><span class="status-badge" style="background:#e0e7ff;color:#3730a3;">${escapeHtml(c.category_name||'-')}</span></td>
+                    <td><strong style="color:#D4AF37;">${(c.votes||0).toLocaleString()}</strong></td>
+                    <td><div class="progress-bar"><div class="progress-fill" style="width:${totalVotes>0?(c.votes/totalVotes)*100:0}%"></div></div><small>${totalVotes>0?((c.votes/totalVotes)*100).toFixed(1):0}%</small></td>
+                    <td><span class="status-badge ${c.is_active?'status-active':'status-inactive'}">${c.is_active?'Active':'Inactive'}</span></td>
+                </tr>
+            `).join('') : '<tr><td colspan="7" style="text-align:center;">No contestants found</td></tr>';
+        }
+
+        async function loadEventFilter(contestants) {
+            const filterSelect = document.getElementById('eventFilterSelect');
+            if (!filterSelect) return;
+            const events = [...new Set(contestants.map(c => c.event_name).filter(Boolean))];
+            filterSelect.innerHTML = '<option value="all">All Events</option>' + events.map(e => `<option value="${e}">${escapeHtml(e)}</option>`).join('');
+            filterSelect.onchange = (e) => {
+                if(e.target.value === 'all') loadResultsTable(contestants);
+                else loadResultsTable(contestants.filter(c => c.event_name === e.target.value));
+            };
+        }
+
+        // ========== CONTESTANTS CRUD ==========
+        async function loadContestants() {
+            const res = await fetch(`${API_URL}/contestants`);
+            const result = await res.json();
+            if(result.success){
+                const tbody = document.getElementById('contestantsTable');
+                tbody.innerHTML = result.data.map(c => `
+                    <tr>
+                        <td><img src="${c.image||'https://placehold.co/40x40/eee/333?text=?'}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;" onerror="this.src='https://placehold.co/40x40/eee/333?text=?'"></td>
+                        <td><strong>${escapeHtml(c.full_name)}</strong><br><small>ID: ${escapeHtml(c.contestant_unique_id||'N/A')}</small></td>
+                        <td><span class="status-badge status-active">${escapeHtml(c.category_name||'-')}</span></td>
+                        <td><span class="status-badge" style="background:#e0e7ff;color:#3730a3;">${escapeHtml(c.event_name||'-')}</span></td>
+                        <td>${c.votes||0}</td>
+                        <td><span class="status-badge ${c.is_active?'status-active':'status-inactive'}">${c.is_active?'Active':'Inactive'}</span></td>
+                        <td><button class="btn-edit" onclick="editContestant(${c.id})"><i class="fas fa-edit"></i></button><button class="btn-delete" onclick="deleteContestant(${c.id})"><i class="fas fa-trash"></i></button></td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        async function loadEventsForDropdown() {
+            const res = await fetch(`${API_URL}/events`);
+            const result = await res.json();
+            if(result.success){
+                const options = '<option value="">-- Select Event --</option>' + result.data.filter(e=>e.is_active).map(e=>`<option value="${e.id}">${escapeHtml(e.event_name)}</option>`).join('');
+                document.getElementById('contestantEventId').innerHTML = options;
+                document.getElementById('categoryEventId').innerHTML = options;
+            }
+        }
+
+        async function loadCategoriesForContestant(eventId) {
+            const catSelect = document.getElementById('contestantCategoryId');
+            if(!eventId){ catSelect.innerHTML='<option value="">-- Select Event First --</option>'; catSelect.disabled=true; return; }
+            catSelect.innerHTML='<option value="">Loading...</option>'; catSelect.disabled=true;
+            const res = await fetch(`${API_URL}/categories/event/${eventId}`);
+            const result = await res.json();
+            if(result.success && result.data.length){
+                catSelect.innerHTML = '<option value="">-- Select Category --</option>' + result.data.map(c=>`<option value="${c.id}">${escapeHtml(c.category_name)}</option>`).join('');
+                catSelect.disabled=false;
+            } else { catSelect.innerHTML='<option value="">-- No Categories --</option>'; catSelect.disabled=true; }
+        }
+
+        document.getElementById('contestantEventId')?.addEventListener('change', e => loadCategoriesForContestant(e.target.value));
+
+        async function editContestant(id){
+            const res = await fetch(`${API_URL}/contestants/${id}`);
+            const c = (await res.json()).data;
+            document.getElementById('contestantModalTitle').innerHTML='Edit Contestant';
+            document.getElementById('contestantId').value=c.id;
+            document.getElementById('contestantFullName').value=c.full_name;
+            document.getElementById('contestantBio').value=c.biography||'';
+            document.getElementById('contestantInstagram').value=c.instagram||'';
+            document.getElementById('contestantTiktok').value=c.tiktok||'';
+            document.getElementById('contestantFacebook').value=c.facebook||'';
+            document.getElementById('contestantStatus').value=c.is_active?1:0;
+            await loadEventsForDropdown();
+            if(c.event_id){
+                document.getElementById('contestantEventId').value=c.event_id;
+                await loadCategoriesForContestant(c.event_id);
+                setTimeout(()=>document.getElementById('contestantCategoryId').value=c.category_id,300);
+            }
+            if(c.image) document.getElementById('contestantImagePreview').src=c.image;
+            document.getElementById('contestantModal').classList.remove('hidden');
+        }
+
+        async function deleteContestant(id){
+            if(confirm('Are you sure you want to delete this contestant?')){
+                await apiCall(`/contestants/${id}`,{method:'DELETE'});
+                showToast('Contestant deleted','success');
+                loadContestants();
+                loadDashboard();
+            }
+        }
+
+        document.getElementById('contestantForm')?.addEventListener('submit', async(e) => {
+            e.preventDefault();
+            const id = document.getElementById('contestantId').value;
+            const fd = new FormData();
+            fd.append('full_name', document.getElementById('contestantFullName').value);
+            fd.append('biography', document.getElementById('contestantBio').value);
+            fd.append('category_id', document.getElementById('contestantCategoryId').value);
+            fd.append('event_id', document.getElementById('contestantEventId').value);
+            fd.append('instagram', document.getElementById('contestantInstagram').value);
+            fd.append('tiktok', document.getElementById('contestantTiktok').value);
+            fd.append('facebook', document.getElementById('contestantFacebook').value);
+            fd.append('is_active', document.getElementById('contestantStatus').value);
+            const img = document.getElementById('contestantImage').files[0];
+            if(img) fd.append('image', img);
+            await apiCall(id ? `/contestants/${id}` : '/contestants', { method: id ? 'PUT' : 'POST', body: fd });
+            showToast(id ? 'Contestant updated' : 'Contestant added', 'success');
+            closeModal('contestantModal');
+            loadContestants();
+            loadDashboard();
+        });
+
+        // ========== EVENTS CRUD ==========
+        async function loadEvents() {
+            const res = await fetch(`${API_URL}/events`);
+            const result = await res.json();
+            const grid = document.getElementById('eventsGrid');
+            if(!result.success || !result.data.length){ grid.innerHTML='<div style="text-align:center;padding:2rem;">No events found</div>'; return; }
+            grid.innerHTML = result.data.map(e => `
+                <div class="event-card">
+                    <div class="event-image"><img src="${e.event_image||'https://placehold.co/400x180/1a1a1a/D4AF37?text=Event'}" onerror="this.src='https://placehold.co/400x180/1a1a1a/D4AF37?text=Event'"></div>
+                    <div class="event-info">
+                        <h3 class="event-title">${escapeHtml(e.event_name)}</h3>
+                        <p>Price: ${e.currency||'GHS'} ${e.vote_price}/vote</p>
+                        <p>${formatDate(e.start_date)} - ${formatDate(e.end_date)}</p>
+                        <p>Status: <span class="status-badge ${e.is_active?'status-active':'status-inactive'}">${e.is_active?'Active':'Inactive'}</span></p>
+                        <div class="event-actions"><button class="btn btn-outline" onclick="editEvent(${e.id})"><i class="fas fa-edit"></i> Edit</button><button class="btn btn-danger" onclick="deleteEvent(${e.id})"><i class="fas fa-trash"></i> Delete</button></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function editEvent(id){
+            const res = await fetch(`${API_URL}/events/${id}`);
+            const e = (await res.json()).data;
+            document.getElementById('eventModalTitle').innerHTML='Edit Event';
+            document.getElementById('eventId').value=e.id;
+            document.getElementById('eventName').value=e.event_name;
+            document.getElementById('eventDescription').value=e.description||'';
+            document.getElementById('eventStartDate').value=e.start_date?.slice(0,16)||'';
+            document.getElementById('eventEndDate').value=e.end_date?.slice(0,16)||'';
+            document.getElementById('eventVotePrice').value=e.vote_price;
+            document.getElementById('eventCurrency').value=e.currency||'GHS';
+            document.getElementById('eventStatus').value=e.is_active?1:0;
+            if(e.event_image) document.getElementById('eventImagePreview').src=e.event_image;
+            document.getElementById('eventModal').classList.remove('hidden');
+        }
+
+        async function deleteEvent(id){
+            if(confirm('Delete this event? Categories under it will also be removed.')){
+                await apiCall(`/events/${id}`,{method:'DELETE'});
+                showToast('Event deleted','success');
+                loadEvents();
+                loadDashboard();
+                loadEventsForDropdown();
+            }
+        }
+
+        document.getElementById('eventForm')?.addEventListener('submit', async(e) => {
+            e.preventDefault();
+            const id = document.getElementById('eventId').value;
+            const fd = new FormData();
+            fd.append('event_name', document.getElementById('eventName').value);
+            fd.append('description', document.getElementById('eventDescription').value);
+            fd.append('start_date', document.getElementById('eventStartDate').value);
+            fd.append('end_date', document.getElementById('eventEndDate').value);
+            fd.append('vote_price', document.getElementById('eventVotePrice').value);
+            fd.append('currency', document.getElementById('eventCurrency').value);
+            fd.append('is_active', document.getElementById('eventStatus').value);
+            const img = document.getElementById('eventImage').files[0];
+            if(img) fd.append('event_image', img);
+            const res = await fetch(`${API_URL}${id?`/events/${id}`:'/events'}`, { method: id ? 'PUT' : 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: fd });
+            const result = await res.json();
+            if(result.success){
+                showToast(id ? 'Event updated' : 'Event added', 'success');
+                closeModal('eventModal');
+                loadEvents();
+                loadDashboard();
+                loadEventsForDropdown();
+            }
+        });
+
+        // ========== CATEGORIES CRUD ==========
+        async function loadCategories(){
+            const res = await fetch(`${API_URL}/categories`);
+            const result = await res.json();
+            const tbody = document.getElementById('categoriesTable');
+            if(!result.success || !result.data.length){ tbody.innerHTML='<tr><td colspan="5" style="text-align:center;">No categories found</td></tr>'; return; }
+            tbody.innerHTML = result.data.map(c => `
+                <tr>
+                    <td><strong>${escapeHtml(c.category_name)}</strong></td>
+                    <td>${escapeHtml(c.event_name||'-')}</td>
+                    <td>${c.sort_order||0}</td>
+                    <td><span class="status-badge ${c.is_active?'status-active':'status-inactive'}">${c.is_active?'Active':'Inactive'}</span></td>
+                    <td><button class="btn-edit" onclick="editCategory(${c.id})"><i class="fas fa-edit"></i></button><button class="btn-delete" onclick="deleteCategory(${c.id})"><i class="fas fa-trash"></i></button></td>
+                </tr>
+            `).join('');
+        }
+
+        async function editCategory(id){
+            const res = await fetch(`${API_URL}/categories/${id}`);
+            const c = (await res.json()).data;
+            document.getElementById('categoryModalTitle').innerHTML='Edit Category';
+            document.getElementById('categoryId').value=c.id;
+            document.getElementById('categoryName').value=c.category_name;
+            document.getElementById('categoryEventId').value=c.event_id;
+            document.getElementById('categoryDescription').value=c.category_description||'';
+            document.getElementById('categorySortOrder').value=c.sort_order||0;
+            document.getElementById('categoryStatus').value=c.is_active?1:0;
+            document.getElementById('categoryModal').classList.remove('hidden');
+        }
+
+        async function deleteCategory(id){
+            if(confirm('Are you sure?')){
+                await apiCall(`/categories/${id}`,{method:'DELETE'});
+                showToast('Category deleted','success');
+                loadCategories();
+            }
+        }
+
+        document.getElementById('categoryForm')?.addEventListener('submit', async(e) => {
+            e.preventDefault();
+            const id = document.getElementById('categoryId').value;
+            const data = {
+                category_name: document.getElementById('categoryName').value,
+                event_id: document.getElementById('categoryEventId').value,
+                category_description: document.getElementById('categoryDescription').value,
+                sort_order: parseInt(document.getElementById('categorySortOrder').value),
+                is_active: parseInt(document.getElementById('categoryStatus').value)
+            };
+            const res = await apiCall(id ? `/categories/${id}` : '/categories', { method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+            if(res.success){
+                showToast(id ? 'Category updated' : 'Category added', 'success');
+                closeModal('categoryModal');
+                loadCategories();
+            }
+        });
+
+        // ========== TRANSACTIONS ==========
+        async function loadAllTransactions(){
+            const res = await fetch(`${API_URL}/votes`);
+            const result = await res.json();
+            const tbody = document.getElementById('transactionsTableBody');
+            if(!result.success || !result.data.length){ tbody.innerHTML='<tr><td colspan="9" style="text-align:center;">No transactions found</td></tr>'; return; }
+            tbody.innerHTML = result.data.map((t,idx) => `
+                <tr>
+                    <td>${idx+1}</td>
+                    <td>${escapeHtml(t.voter_name||'Anonymous')}</td>
+                    <td>${escapeHtml(t.voter_email||'-')}</td>
+                    <td>${escapeHtml(t.contestant_name||'-')}</td>
+                    <td>${escapeHtml(t.event_name||'-')}</td>
+                    <td>${t.votes_count||0}</td>
+                    <td>GHS ${(t.amount_paid||0).toFixed(2)}</td>
+                    <td>${formatDate(t.created_at)}</td>
+                    <td><span class="status-badge status-${t.payment_status}">${t.payment_status||'pending'}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // ========== EXPORT FUNCTIONS ==========
+        function exportToCSV(){
+            const rows = document.querySelectorAll('#transactionsTable tr');
+            let csv = [];
+            rows.forEach(row => { const cells = row.querySelectorAll('th,td'); csv.push(Array.from(cells).map(c=>`"${c.innerText.replace(/"/g,'""')}"`).join(',')); });
+            downloadCSV(csv.join('\n'), 'tekvotes_transactions.csv');
+        }
+        function exportTransactionsToCSV(){
+            const rows = document.querySelectorAll('#allTransactionsTable tr');
+            let csv = [];
+            rows.forEach(row => { const cells = row.querySelectorAll('th,td'); csv.push(Array.from(cells).map(c=>`"${c.innerText.replace(/"/g,'""')}"`).join(',')); });
+            downloadCSV(csv.join('\n'), 'tekvotes_all_transactions.csv');
+        }
+        function exportResultsToCSV(){
+            const rows = document.querySelectorAll('#resultsTable tr');
+            let csv = [];
+            rows.forEach(row => { const cells = row.querySelectorAll('th,td'); csv.push(Array.from(cells).map(c=>`"${c.innerText.replace(/"/g,'""')}"`).join(',')); });
+            downloadCSV(csv.join('\n'), 'tekvotes_results.csv');
+        }
+        function downloadCSV(content, filename){
+            const blob = new Blob([content], {type:'text/csv;charset=utf-8;'});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+            URL.revokeObjectURL(link.href);
+            showToast('Export completed!','success');
+        }
+        function printReport(){ window.print(); }
+        function generateResultsReport(){
+            const content = document.getElementById('resultsTable').outerHTML;
+            const w = window.open('','_blank');
+            w.document.write(`<html><head><title>TekVotes Results Report</title><style>body{font-family:Arial;padding:20px;}table{border-collapse:collapse;width:100%;}th,td{border:1px solid #ddd;padding:8px;}th{background:#D4AF37;}</style></head><body><h1>TekVotes Results Report</h1><p>Generated: ${new Date().toLocaleString()}</p>${content}</body></html>`);
+            w.document.close();
+            w.print();
+        }
+
+        // ========== INITIALIZATION ==========
+        document.getElementById('addContestantBtn')?.addEventListener('click', async () => {
+            document.getElementById('contestantModalTitle').innerHTML='Add Contestant';
+            document.getElementById('contestantForm').reset();
+            document.getElementById('contestantId').value='';
+            document.getElementById('contestantImagePreview').src='https://placehold.co/100x100/eee/333?text=Photo';
+            document.getElementById('contestantCategoryId').innerHTML='<option value="">-- Select Event First --</option>';
+            document.getElementById('contestantCategoryId').disabled=true;
+            await loadEventsForDropdown();
+            document.getElementById('contestantModal').classList.remove('hidden');
+        });
+        document.getElementById('addEventBtn')?.addEventListener('click', () => {
+            document.getElementById('eventModalTitle').innerHTML='Add Event';
+            document.getElementById('eventForm').reset();
+            document.getElementById('eventId').value='';
+            document.getElementById('eventImagePreview').src='https://placehold.co/300x150/eee/333?text=Event+Image';
+            document.getElementById('eventModal').classList.remove('hidden');
+        });
+        document.getElementById('addCategoryBtn')?.addEventListener('click', async () => {
+            document.getElementById('categoryModalTitle').innerHTML='Add Category';
+            document.getElementById('categoryForm').reset();
+            document.getElementById('categoryId').value='';
+            await loadEventsForDropdown();
+            document.getElementById('categoryModal').classList.remove('hidden');
+        });
+        document.getElementById('logoutBtn')?.addEventListener('click', () => { localStorage.clear(); window.location.href='admin-login.html'; });
+
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                document.querySelectorAll('.dashboard-section').forEach(s => s.classList.remove('active'));
+                document.getElementById(`section-${link.dataset.section}`).classList.add('active');
+                document.getElementById('breadcrumb').textContent = link.querySelector('span')?.textContent || 'Dashboard';
+                if(link.dataset.section === 'results') loadResultsData();
+            });
+        });
+        document.getElementById('sidebarToggle')?.addEventListener('click', () => document.getElementById('sidebar').classList.toggle('open'));
+
+        // Search
+        document.getElementById('searchContestant')?.addEventListener('input', async(e) => {
+            const search = e.target.value.toLowerCase();
+            const res = await fetch(`${API_URL}/contestants`);
+            const data = (await res.json()).data || [];
+            const filtered = data.filter(c => c.full_name.toLowerCase().includes(search));
+            const tbody = document.getElementById('contestantsTable');
+            tbody.innerHTML = filtered.map(c => `
+                <tr>
+                    <td><img src="${c.image||'https://placehold.co/40x40/eee/333?text=?'}" style="width:40px;height:40px;border-radius:50%;"><tr>
+                    <td><strong>${escapeHtml(c.full_name)}</strong></td>
+                    <td>${escapeHtml(c.category_name||'-')}</td>
+                    <td>${escapeHtml(c.event_name||'-')}</td>
+                    <td>${c.votes||0}</td>
+                    <td><span class="status-badge ${c.is_active?'status-active':'status-inactive'}">${c.is_active?'Active':'Inactive'}</span></td>
+                    <td><button class="btn-edit" onclick="editContestant(${c.id})"><i class="fas fa-edit"></i></button><button class="btn-delete" onclick="deleteContestant(${c.id})"><i class="fas fa-trash"></i></button></td>
+                </tr>
+            `).join('');
+        });
+
+        document.getElementById('searchTransaction')?.addEventListener('input', async(e) => {
+            const search = e.target.value.toLowerCase();
+            const res = await fetch(`${API_URL}/votes`);
+            const data = (await res.json()).data || [];
+            const filtered = data.filter(t => (t.voter_name||'').toLowerCase().includes(search) || (t.voter_email||'').toLowerCase().includes(search));
+            const tbody = document.getElementById('transactionsTableBody');
+            tbody.innerHTML = filtered.map((t,idx) => `
+                <tr>
+                    <td>${idx+1}</td>
+                    <td>${escapeHtml(t.voter_name||'Anonymous')}</td>
+                    <td>${escapeHtml(t.voter_email||'-')}</td>
+                    <td>${escapeHtml(t.contestant_name||'-')}</td>
+                    <td>${escapeHtml(t.event_name||'-')}</td>
+                    <td>${t.votes_count||0}</td>
+                    <td>GHS ${(t.amount_paid||0).toFixed(2)}</td>
+                    <td>${formatDate(t.created_at)}</td>
+                    <td><span class="status-badge status-${t.payment_status}">${t.payment_status||'pending'}</span></td>
+                </tr>
+            `).join('');
+        });
+
+        // Initialize all
+        displayAdminRole();
+        getLiveResultsStatus();
+        loadDashboard();
+        loadContestants();
+        loadEvents();
+        loadCategories();
+        loadAllTransactions();
+        loadEventsForDropdown();
+    </script>
+</body>
+</html>

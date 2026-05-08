@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contestant Profile — TekVotes</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <span class="logo-icon">👑</span>
+                <span class="logo-text">Tek<span class="logo-accent">Votes</span></span>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="contestants.html" class="nav-link active">Contestants</a></li>
+                <li><a href="vote.html" class="nav-link">Vote Now</a></li>
+                <li><a href="admin-login.html" class="nav-link">Admin</a></li>
+            </ul>
+            <a href="vote.html" class="btn btn-primary nav-cta">
+                <i class="fas fa-star"></i> Vote Now
+            </a>
+            <button class="hamburger" id="hamburger" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Loading State -->
+    <div class="page-loader" id="pageLoader">
+        <div class="loader-spinner"></div>
+    </div>
+
+    <!-- Profile Content -->
+    <main class="profile-main" id="profileContent" style="display:none;">
+
+        <!-- Profile Hero -->
+        <section class="profile-hero">
+            <div class="container">
+                <a href="contestants.html" class="back-link">
+                    <i class="fas fa-arrow-left"></i> Back to Contestants
+                </a>
+
+                <div class="profile-layout">
+
+                    <!-- Image Column -->
+                    <div class="profile-image-col">
+                        <div class="profile-image-wrapper">
+                            <img src="" alt="" id="profileImage" class="profile-image">
+                            <div class="profile-rank" id="profileRank">#1</div>
+                        </div>
+
+                        <!-- Social Links -->
+                        <div class="profile-social" id="profileSocial">
+                            <!-- Loaded dynamically -->
+                        </div>
+
+                        <!-- Vote Button -->
+                        <a href="#" id="profileVoteBtn" class="btn btn-primary btn-large btn-block">
+                            <i class="fas fa-vote-yea"></i>
+                            Vote for Me!
+                        </a>
+                    </div>
+
+                    <!-- Info Column -->
+                    <div class="profile-info-col">
+                        <div class="profile-category" id="profileCategory">
+                            Miss Elegance
+                        </div>
+
+                        <h1 class="profile-name" id="profileName">Loading...</h1>
+
+                        <div class="profile-event" id="profileEvent">Miss TekVotes 2024</div>
+
+                        <!-- Vote Stats -->
+                        <div class="profile-stats">
+                            <div class="profile-stat">
+                                <span class="profile-stat-number" id="profileVotes">0</span>
+                                <span class="profile-stat-label">Total Votes</span>
+                            </div>
+                            <div class="profile-stat-divider"></div>
+                            <div class="profile-stat">
+                                <span class="profile-stat-number" id="profileRanking">—</span>
+                                <span class="profile-stat-label">Current Rank</span>
+                            </div>
+                        </div>
+
+                        <!-- Vote Progress -->
+                        <div class="vote-progress-section">
+                            <div class="progress-header">
+                                <span>Vote Progress</span>
+                                <span id="progressPercent">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Biography -->
+                        <div class="profile-bio-section">
+                            <h3>About</h3>
+                            <p class="profile-bio" id="profileBio">Loading biography...</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Vote Section -->
+        <section class="section quick-vote-section">
+            <div class="container">
+                <div class="quick-vote-card glass-card">
+                    <div class="quick-vote-header">
+                        <h2>Vote for <span id="quickVoteName" class="title-gradient">this contestant</span></h2>
+                        <p>Every vote counts! Support your favorite contestant now.</p>
+                    </div>
+
+                    <div class="vote-price-info">
+                        <span class="vote-price-badge">
+                            <i class="fas fa-tag"></i>
+                            <span id="votePriceDisplay">GHS 1.00</span> per vote
+                        </span>
+                    </div>
+
+                    <div class="quick-vote-actions">
+                        <div class="vote-quantity">
+                            <button class="qty-btn" id="decreaseVotes">−</button>
+                            <input type="number" id="quickVoteCount" value="1" min="1" max="1000">
+                            <button class="qty-btn" id="increaseVotes">+</button>
+                        </div>
+
+                        <div class="vote-amount-display">
+                            Total: <strong id="quickVoteTotal">GHS 1.00</strong>
+                        </div>
+
+                        <a href="#" id="quickVoteBtn" class="btn btn-primary btn-large">
+                            <i class="fas fa-star"></i>
+                            Vote Now — <span id="quickVoteBtnTotal">GHS 1.00</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Other Contestants -->
+        <section class="section other-contestants-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Other Contestants</h2>
+                    <a href="contestants.html" class="btn btn-outline">View All</a>
+                </div>
+                <div class="contestants-grid mini" id="otherContestants">
+                    <!-- Loaded dynamically -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2024 TekVotes. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/profile.js"></script>
+</body>
+</html>

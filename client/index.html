@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TekVotes — Vote for Your Favorite Contestant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f9fafb; color: #111827; }
+        .container { max-width: 1280px; width: 90%; margin: 0 auto; }
+        
+        /* Navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 1rem 0;
+            transition: all 0.3s;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .nav-container {
+            max-width: 1280px;
+            width: 90%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-decoration: none;
+            color: #111;
+        }
+        .logo-accent { color: #D4AF37; }
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .nav-link { text-decoration: none; font-weight: 500; color: #6b7280; transition: color 0.3s; }
+        .nav-link:hover, .nav-link.active { color: #D4AF37; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            border-radius: 0.75rem;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .btn-primary { background: linear-gradient(135deg, #D4AF37, #E8C860); color: #111; }
+        .btn-primary:hover { transform: translateY(-2px); }
+        .btn-outline { background: transparent; border: 2px solid #e5e7eb; color: #374151; }
+        .btn-outline:hover { border-color: #D4AF37; color: #D4AF37; }
+        .btn-small { padding: 0.5rem 1rem; font-size: 0.875rem; }
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+        .hamburger span { width: 25px; height: 2px; background: #111; transition: 0.3s; }
+        
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            padding-top: 80px;
+        }
+        .hero-container {
+            max-width: 1280px;
+            width: 90%;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+        .hero-title { font-size: 3.5rem; font-weight: 800; margin-bottom: 1.5rem; line-height: 1.2; }
+        .hero-subtitle { font-size: 1.125rem; margin-bottom: 2rem; opacity: 0.9; }
+        .hero-stats { display: flex; gap: 2rem; margin-top: 2rem; }
+        .hero-stats .stat-number { font-size: 2rem; font-weight: 700; display: block; }
+        .hero-image { width: 100%; border-radius: 1rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+        
+        /* Sections */
+        .section { padding: 5rem 0; }
+        .section-header { text-align: center; margin-bottom: 3rem; }
+        .section-badge {
+            display: inline-block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #D4AF37;
+            margin-bottom: 1rem;
+        }
+        .section-title { font-size: 2.5rem; font-weight: 700; margin-bottom: 1rem; }
+        .section-subtitle { font-size: 1.125rem; color: #6b7280; max-width: 600px; margin: 0 auto; }
+        
+        /* Events Grid */
+        .events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+        .event-card {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .event-card:hover { transform: translateY(-5px); }
+        .event-image { height: 200px; overflow: hidden; }
+        .event-image img { width: 100%; height: 100%; object-fit: cover; }
+        .event-info { padding: 1.5rem; }
+        .event-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .event-description { color: #6b7280; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .event-details { display: flex; justify-content: space-between; margin-bottom: 1rem; font-size: 0.875rem; color: #4b5563; }
+        .event-details i { color: #D4AF37; margin-right: 0.25rem; }
+        
+        /* Contestants Grid */
+        .contestants-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+        .contestant-card {
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .contestant-card:hover { transform: translateY(-5px); }
+        .contestant-image {
+            position: relative;
+            height: 320px;
+            overflow: hidden;
+        }
+        .contestant-image img { width: 100%; height: 100%; object-fit: cover; }
+        .contestant-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            padding: 1rem;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .contestant-votes { background: #D4AF37; color: #111; padding: 0.25rem 0.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 600; }
+        .contestant-info { padding: 1.25rem; }
+        .contestant-name { font-size: 1.125rem; font-weight: 700; margin-bottom: 0.25rem; }
+        .contestant-category { font-size: 0.75rem; color: #D4AF37; font-weight: 600; margin-bottom: 0.75rem; }
+        .contestant-actions { display: flex; gap: 0.5rem; }
+        
+        /* Steps */
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+        .step-card {
+            text-align: center;
+            padding: 2rem;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        .step-number {
+            position: absolute;
+            top: -1rem;
+            left: -1rem;
+            width: 3rem;
+            height: 3rem;
+            background: linear-gradient(135deg, #D4AF37, #E8C860);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        .step-icon { font-size: 3rem; margin-bottom: 1rem; }
+        
+        /* Leaderboard */
+        .leaderboard { max-width: 600px; margin: 0 auto; }
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+        .leaderboard-rank { font-size: 1.5rem; font-weight: 700; width: 50px; text-align: center; }
+        .rank-1 { color: #D4AF37; font-size: 2rem; }
+        .leaderboard-img { width: 50px; height: 50px; border-radius: 0.5rem; object-fit: cover; }
+        .leaderboard-info { flex: 1; }
+        .leaderboard-name { font-weight: 600; }
+        .leaderboard-category { font-size: 0.75rem; color: #6b7280; }
+        .leaderboard-votes { font-weight: 700; color: #D4AF37; }
+        
+        /* Footer */
+        .footer {
+            background: #111;
+            color: #9ca3af;
+            padding: 3rem 0 1.5rem;
+            margin-top: 3rem;
+        }
+        .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1.5fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        .footer-bottom { text-align: center; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); }
+        
+        .skeleton-card {
+            background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+            background-size: 200% 100%;
+            animation: skeleton 1.5s infinite;
+            border-radius: 1rem;
+            height: 350px;
+        }
+        @keyframes skeleton {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .animate-fade-up {
+            animation: fadeUp 0.6s ease forwards;
+            opacity: 0;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        
+        @media (max-width: 768px) {
+            .hero-container { grid-template-columns: 1fr; text-align: center; }
+            .hero-title { font-size: 2.5rem; }
+            .hero-stats { justify-content: center; }
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 70%;
+                height: 100vh;
+                background: white;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                transition: right 0.3s;
+                box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+                z-index: 999;
+            }
+            .nav-links.active { right: 0; }
+            .hamburger { display: flex; }
+            .steps-grid { grid-template-columns: 1fr; }
+            .footer-content { grid-template-columns: 1fr; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo"> Tek<span class="logo-accent">Votes</span></a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html" class="nav-link active">Home</a></li>
+                <li><a href="contestants.html" class="nav-link">Contestants</a></li>
+                <li><a href="events.html" class="nav-link">Events</a></li>
+                <li><a href="results.html" class="nav-link">Live Results</a></li>
+                <li><a href="nominate.html" class="nav-link">Nominate</a></li>
+                <li><a href="vote.html" class="nav-link">Vote Now</a></li>
+                <li><a href="admin-login.html" class="nav-link">Admin</a></li>
+            </ul>
+            <a href="vote.html" class="btn btn-primary">Vote Now</a>
+            <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content animate-fade-up">
+                <h1 class="hero-title">Vote for Your<br><span style="color:#D4AF37;">Favorite Contestant</span></h1>
+                <p class="hero-subtitle">Support your favorite contestant in the most prestigious beauty pageant. Every vote counts — make yours matter today!</p>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <a href="contestants.html" class="btn btn-primary">View Contestants</a>
+                    <a href="vote.html" class="btn btn-outline" style="background:rgba(255,255,255,0.1); color:white; border-color:rgba(255,255,255,0.3);">Vote Now</a>
+                </div>
+                <div class="hero-stats">
+                    <div><span class="stat-number" id="statContestants">0</span><br>Contestants</div>
+                    <div><span class="stat-number" id="statVotes">0</span><br>Total Votes</div>
+                    <div><span class="stat-number" id="statVoters">0</span><br>Voters</div>
+                </div>
+            </div>
+            <div class="hero-image animate-fade-up delay-1">
+                <img src="images/hero-image1.jpg" alt="Beauty Queen" style="width:100%; border-radius:1rem;">
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Events Section -->
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-badge"> Featured Events</div>
+                <h2 class="section-title">Upcoming Events</h2>
+                <p class="section-subtitle">Discover our ongoing and upcoming beauty pageants</p>
+            </div>
+            <div class="events-grid" id="featuredEventsGrid">
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+            </div>
+            <div style="text-align:center; margin-top:2rem;">
+                <a href="events.html" class="btn btn-outline">View All Events <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Contestants Section -->
+    <section class="section" style="background: #f3f4f6;">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-badge"> Top Contestants</div>
+                <h2 class="section-title">Meet Our Contestants</h2>
+                <p class="section-subtitle">Discover amazing contestants competing for the crown</p>
+            </div>
+            <div class="contestants-grid" id="featuredContestantsGrid">
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+            </div>
+            <div style="text-align:center; margin-top:2rem;">
+                <a href="contestants.html" class="btn btn-outline">View All Contestants <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-badge"> How It Works</div>
+                <h2 class="section-title">Simple Voting Process</h2>
+                <p class="section-subtitle">Support your favorite contestant in 3 easy steps</p>
+            </div>
+            <div class="steps-grid">
+                <div class="step-card"><div class="step-number">01</div><div class="step-icon">👀</div><h3>Browse Contestants</h3><p>Explore profiles and find your favorite</p></div>
+                <div class="step-card"><div class="step-number">02</div><div class="step-icon">🗳️</div><h3>Cast Your Vote</h3><p>Select contestant and choose votes</p></div>
+                <div class="step-card"><div class="step-number">03</div><div class="step-icon">🎉</div><h3>Support Your Queen</h3><p>Complete payment and watch votes grow</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Live Leaderboard -->
+    <section class="section" style="background: linear-gradient(135deg, #111 0%, #1a1a1a 100%); color: white;">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-badge"> Rankings</div>
+                <h2 class="section-title" style="color: white;">Live Leaderboard</h2>
+                <p class="section-subtitle">Real-time rankings updated instantly</p>
+            </div>
+            <div class="leaderboard" id="leaderboard"><div style="text-align:center;">Loading...</div></div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <a href="index.html" class="nav-logo" style="color:white;"> Tek<span class="logo-accent">Votes</span></a>
+                    <p>The premier online voting platform for beauty pageants.</p>
+                </div>
+                <div class="footer-links"><h4>Quick Links</h4><ul><li><a href="contestants.html">Contestants</a></li><li><a href="events.html">Events</a></li><li><a href="results.html">Live Results</a></li></ul></div>
+                <div class="footer-contact"><h4>Contact</h4><p><i class="fas fa-envelope"></i> support@tekvotes.com</p><p><i class="fas fa-phone"></i> +233 XX XXX XXXX</p></div>
+            </div>
+            <div class="footer-bottom"><p>&copy; 2024 TekVotes. All rights reserved. | Powered by Paystack</p></div>
+        </div>
+    </footer>
+
+    <script>
+        const API_URL = window.location.origin + '/api';
+        
+        async function loadFeaturedEvents() {
+            const grid = document.getElementById('featuredEventsGrid');
+            try {
+                const response = await fetch(`${API_URL}/events/featured`);
+                const result = await response.json();
+                if (result.success && result.data && result.data.length > 0) {
+                    grid.innerHTML = result.data.map(event => `
+                        <div class="event-card">
+                            <div class="event-image">
+                                <img src="${event.event_image || 'https://placehold.co/400x200/1a1a1a/D4AF37?text=Event'}" 
+                                     alt="${escapeHtml(event.event_name)}"
+                                     onerror="this.src='https://placehold.co/400x200/1a1a1a/D4AF37?text=Event'">
+                            </div>
+                            <div class="event-info">
+                                <h3 class="event-title">${escapeHtml(event.event_name)}</h3>
+                                <p class="event-description">${escapeHtml(event.description?.substring(0, 100) || '')}</p>
+                                <div class="event-details">
+                                    <span><i class="fas fa-tag"></i> ${formatCurrency(event.vote_price)}/vote</span>
+                                    <span><i class="fas fa-calendar"></i> ${formatDate(event.end_date)}</span>
+                                </div>
+                                <a href="vote.html" class="btn btn-primary btn-small">Vote Now</a>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    grid.innerHTML = '<p style="text-align:center; grid-column:1/-1;">No featured events available.</p>';
+                }
+            } catch (error) { console.error(error); }
+        }
+        
+        async function loadFeaturedContestants() {
+            const grid = document.getElementById('featuredContestantsGrid');
+            try {
+                const response = await fetch(`${API_URL}/contestants`);
+                const result = await response.json();
+                if (result.success && result.data && result.data.length > 0) {
+                    const top6 = result.data.slice(0, 6);
+                    grid.innerHTML = top6.map(c => `
+                        <div class="contestant-card">
+                            <div class="contestant-image">
+                                <img src="${c.image || 'https://placehold.co/400x500/1a1a1a/D4AF37?text=No+Image'}" onerror="this.src='https://placehold.co/400x500/1a1a1a/D4AF37?text=No+Image'">
+                                <div class="contestant-overlay"><span class="contestant-votes">${(c.votes || 0).toLocaleString()} votes</span></div>
+                            </div>
+                            <div class="contestant-info">
+                                <h3 class="contestant-name">${escapeHtml(c.full_name)}</h3>
+                                <p class="contestant-category">${escapeHtml(c.category_name || 'Contestant')}</p>
+                                <div class="contestant-actions">
+                                    <a href="profile.html?id=${c.id}" class="btn btn-outline btn-small">View</a>
+                                    <a href="vote.html?contestant=${c.id}" class="btn btn-primary btn-small">Vote</a>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    document.getElementById('statContestants').textContent = result.data.length;
+                    const totalVotes = result.data.reduce((s, c) => s + (c.votes || 0), 0);
+                    document.getElementById('statVotes').textContent = totalVotes.toLocaleString();
+                    document.getElementById('statVoters').textContent = Math.floor(totalVotes * 0.7).toLocaleString();
+                }
+            } catch (error) { console.error(error); }
+        }
+        
+        async function loadLeaderboard() {
+            const leaderboardEl = document.getElementById('leaderboard');
+            try {
+                const response = await fetch(`${API_URL}/contestants`);
+                const result = await response.json();
+                if (result.success && result.data && result.data.length > 0) {
+                    const top10 = [...result.data].sort((a, b) => (b.votes || 0) - (a.votes || 0)).slice(0, 10);
+                    leaderboardEl.innerHTML = top10.map((c, idx) => `
+                        <div class="leaderboard-item">
+                            <div class="leaderboard-rank ${idx === 0 ? 'rank-1' : ''}">${idx === 0 ? '🏆' : (idx + 1)}</div>
+                            <img src="${c.image || 'https://placehold.co/50x50/1a1a1a/D4AF37?text=?'}" class="leaderboard-img" onerror="this.src='https://placehold.co/50x50/1a1a1a/D4AF37?text=?'">
+                            <div class="leaderboard-info">
+                                <div class="leaderboard-name">${escapeHtml(c.full_name)}</div>
+                                <div class="leaderboard-category">${escapeHtml(c.category_name || 'Contestant')}</div>
+                            </div>
+                            <div class="leaderboard-votes">${(c.votes || 0).toLocaleString()} votes</div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) { console.error(error); }
+        }
+        
+        function formatCurrency(amount) { return new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(amount || 0); }
+        function formatDate(dateString) { if (!dateString) return '—'; return new Date(dateString).toLocaleDateString(); }
+        function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;'); }
+        
+        function initNavbar() {
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => { if (window.scrollY > 50) navbar.classList.add('scrolled'); else navbar.classList.remove('scrolled'); });
+        }
+        
+        function initMobileMenu() {
+            const hamburger = document.getElementById('hamburger');
+            const navLinks = document.getElementById('navLinks');
+            if (hamburger) {
+                hamburger.addEventListener('click', () => {
+                    hamburger.classList.toggle('active');
+                    navLinks.classList.toggle('active');
+                });
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFeaturedEvents();
+            loadFeaturedContestants();
+            loadLeaderboard();
+            initNavbar();
+            initMobileMenu();
+        });
+    </script>
+</body>
+</html>
